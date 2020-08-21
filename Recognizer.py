@@ -1,4 +1,5 @@
 from Analyzer import check_first_word, check_bad_encoding
+import asyncio
 
 class Recognizer(object):
 
@@ -6,6 +7,7 @@ class Recognizer(object):
 		self.__channel = channel
 		self.__message_buffer = []
 		self.__message_flags = []
+		await asyncio.create_task(clear_buffer(1800))
 
 	def check_message(self,  message: str) -> bool:
 		return check_message(message) and check_bad_encoding(message)
@@ -19,7 +21,6 @@ class Recognizer(object):
 			if self.__message_buffer[i][6:] == message[6:]:
 				return i
 		return -1
-
 	def get_message(self, id: int):
 		return self.__message_buffer[id]
 
@@ -28,3 +29,9 @@ class Recognizer(object):
 
 	def set_ban(self, id: int):
 		self.__message_flags[id] = True
+
+	async def clear_buffer(self, wait_time):
+		while True:
+			self.__message_buffer.clear()
+			self.__message_flags.clear()
+			await asyncio.sleep(wait_time)
